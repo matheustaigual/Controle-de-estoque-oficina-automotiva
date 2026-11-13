@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oficina Pro | Loja e Controle de Estoque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1115; --panel:#181b22; --panel2:#1f232c; --line:#2b303b;
+  --text:#eceef2; --muted:#9097a5; --accent:#ff7a1a; --accent2:#ffa24d;
+  --ok:#2ecc71; --warn:#f5b301; --bad:#ef4b4b; --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+h1,h2,h3,.brand{font-family:'Barlow Condensed',Inter,sans-serif;letter-spacing:.02em}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent2)}
+.hidden{display:none!important}
+
+/* header */
+header{position:sticky;top:0;z-index:20;background:rgba(15,17,21,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{max-width:1200px;margin:auto;display:flex;align-items:center;gap:16px;padding:12px 20px}
+.brand{font-size:26px;font-weight:700;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;text-transform:uppercase}
+.brand b{color:var(--accent)}
+nav{display:flex;gap:4px;margin-left:auto;align-items:center}
+nav a,nav button{background:none;border:0;padding:8px 14px;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;font-weight:500}
+nav a:hover,nav button:hover,nav a.on{color:var(--text);background:var(--panel2)}
+.cartbtn{position:relative;background:var(--accent)!important;color:#111!important;font-weight:600}
+.cartbtn .n{background:#111;color:var(--accent);border-radius:20px;padding:0 7px;margin-left:6px;font-size:12px}
+
+main{max-width:1200px;margin:auto;padding:24px 20px 80px}
+
+/* buttons / inputs */
+.btn{background:var(--accent);color:#111;border:0;padding:10px 18px;border-radius:9px;font-weight:600;cursor:pointer;transition:.15s;display:inline-block}
+.btn:hover{background:var(--accent2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--panel2)}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.btn.danger:hover{background:var(--bad);color:#fff}
+.btn.sm{padding:6px 11px;font-size:13px}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 12px;width:100%;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+.field{margin-bottom:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* hero */
+.hero{background:linear-gradient(120deg,#1c1f27 0%,#2a1c10 100%);border:1px solid var(--line);border-radius:18px;padding:36px;margin-bottom:24px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;border:34px solid rgba(255,122,26,.12)}
+.hero h1{font-size:44px;line-height:1.05;text-transform:uppercase;max-width:620px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);margin-top:10px;max-width:520px}
+
+.tools{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+.tools input{max-width:320px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--panel);border:1px solid var(--line);padding:6px 14px;border-radius:30px;cursor:pointer;font-size:14px;color:var(--muted)}
+.chip.on,.chip:hover{border-color:var(--accent);color:var(--text)}
+.chip.on{background:rgba(255,122,26,.14)}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;transition:.15s}
+.card:hover{border-color:#444b59;transform:translateY(-2px)}
+.thumb{aspect-ratio:4/3;background:var(--panel2);display:flex;align-items:center;justify-content:center;color:#3b4150}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.card .body{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.cat{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent2)}
+.card h3{font-size:20px;line-height:1.15;font-weight:600}
+.sku{font-size:12px;color:var(--muted)}
+.price{font-family:'Barlow Condensed';font-size:28px;font-weight:700;margin-top:auto}
+.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:20px;font-weight:500}
+.b-ok{background:rgba(46,204,113,.14);color:var(--ok)}
+.b-low{background:rgba(245,179,1,.14);color:var(--warn)}
+.b-out{background:rgba(239,75,75,.14);color:var(--bad)}
+.b-info{background:rgba(255,122,26,.14);color:var(--accent2)}
+.b-mute{background:var(--panel2);color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:60px 20px;border:1px dashed var(--line);border-radius:var(--radius)}
+
+/* drawer */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;display:none}
+.overlay.open{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--panel);border-left:1px solid var(--line);z-index:41;transform:translateX(100%);transition:.25s;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.drawer .head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.drawer .head h2{font-size:26px;text-transform:uppercase}
+.drawer .items{flex:1;overflow:auto;padding:12px 20px}
+.drawer .foot{padding:18px 20px;border-top:1px solid var(--line)}
+.citem{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+.citem .info{flex:1;min-width:0}
+.citem .info b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);cursor:pointer}
+.total{display:flex;justify-content:space-between;font-size:20px;margin-bottom:14px}
+
+/* modal */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;width:min(560px,100%);max-height:94vh;overflow:auto}
+.modal h2{font-size:28px;margin-bottom:16px;text-transform:uppercase}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.btn.wpp{background:#25d366;color:#08210f}
+.btn.wpp:hover{background:#3ee07a}
+
+/* admin */
+.tabs{display:flex;gap:6px;margin-bottom:22px;border-bottom:1px solid var(--line);overflow:auto}
+.tabs button{background:none;border:0;padding:12px 18px;color:var(--muted);cursor:pointer;font-weight:500;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--text);border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:24px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.stat small{color:var(--muted);font-size:13px}
+.stat div{font-family:'Barlow Condensed';font-size:34px;font-weight:700;margin-top:2px}
+.stat.warn div{color:var(--warn)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:20px}
+.panel h3{font-size:22px;margin-bottom:12px;text-transform:uppercase}
+.tw{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--muted);font-weight:500;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.tcell{display:flex;gap:10px;align-items:center}
+.mini{width:40px;height:40px;border-radius:8px;background:var(--panel2);overflow:hidden;flex:none;display:flex;align-items:center;justify-content:center;color:#3b4150}
+.mini img{width:100%;height:100%;object-fit:cover}
+.r{text-align:right}
+.btns{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.login{max-width:400px;margin:40px auto}
+.muted{color:var(--muted)}
+pre{background:#0a0c10;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;font-size:12px;max-height:340px;color:#c9d1d9}
+ol.steps{padding-left:20px;color:var(--muted)}
+ol.steps li{margin-bottom:8px}
+ol.steps b{color:var(--text)}
+
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:var(--panel2);border:1px solid var(--line);padding:10px 18px;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.toast.err{border-color:var(--bad);color:#ffb3b3}
+.toast.ok{border-color:var(--ok)}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:30px 0}
+@media(max-width:760px){
+  .two,.row,.row3{grid-template-columns:1fr}
+  .hero{padding:24px}.hero h1{font-size:34px}
+  .brand{font-size:22px}
+  nav a span{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <a class="brand" href="#/">⚙ Oficina<b>Pro</b></a>
+    <nav>
+      <a href="#/" id="nav-loja"><span>Loja</span>🛒</a>
+      <a href="#/admin" id="nav-admin"><span>Estoque</span>📦</a>
+      <button class="cartbtn" id="cartbtn" data-a="openCart">Carrinho <span class="n" id="cartn">0</span></button>
+    </nav>
+  </div>
+</header>
+
+<main id="app"></main>
+<footer id="foot"></footer>
+
+<div class="overlay" id="overlay" data-a="closeCart"></div>
+<aside class="drawer" id="drawer"></aside>
+<div id="modal-root"></div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   CONFIGURAÇÃO
+   Preencha aqui OU use a tela de configuração que aparece
+   automaticamente na primeira abertura (salva no navegador).
+   ============================================================ */
+const CONFIG = {
+  SUPABASE_URL: '',        // ex: https://xxxxx.supabase.co
+  SUPABASE_ANON_KEY: '',   // chave "anon public" do projeto
+  LOJA_NOME: 'Oficina Pro',
+  WHATSAPP: '558193049539' // pedidos vão direto para este número (55 + DDD + número, só dígitos)
+};
+
+/* ============================================================
+   PRODUTOS DE EXEMPLO
+   No painel de estoque, o botão "Carregar produtos de exemplo"
+   cadastra todos estes (os que já existirem não são alterados).
+   Formato: código, nome, categoria, descrição, preço, custo, quantidade, mínimo
+   ============================================================ */
+const SAMPLE_PRODUCTS = [
+  ['MAC-2T','Macaco hidráulico jacaré 2 toneladas','Elevação','Macaco tipo jacaré, ideal para troca de pneus e serviços rápidos.',289.90,190,8,3],
+  ['MAC-CAR','Macaco hidráulico tipo carrinho 3 toneladas','Elevação','Base larga e baixa altura mínima, ótimo para uso diário na oficina.',749.00,510,4,2],
+  ['CAV-2T','Cavalete de apoio 3 toneladas (par)','Elevação','Par de cavaletes com trava de segurança e altura regulável.',259.90,170,2,3],
+  ['RMP-PLS','Rampas de elevação para troca de óleo (par)','Elevação','Rampas reforçadas para acesso à parte inferior do veículo.',329.90,215,5,2],
+  ['CHV-IMP12','Chave de impacto pneumática 1/2"','Ferramentas','Torque de 680 Nm, para rodas e suspensão.',459.00,310,5,2],
+  ['JG-CHV-94','Jogo de chaves soquete 94 peças','Ferramentas','Maleta com soquetes, catraca e extensões em aço cromo-vanádio.',349.90,230,6,2],
+  ['TRQ-12','Torquímetro de estalo 1/2" (28 a 210 Nm)','Ferramentas','Aperto preciso de rodas, cabeçote e componentes de suspensão.',389.90,255,5,2],
+  ['CRR-7G','Carrinho de ferramentas 7 gavetas','Ferramentas','Estrutura em aço com rodízios e trava, gavetas com corrediça.',899.00,620,2,1],
+  ['EXT-FLT','Extrator de filtro de óleo tipo cinta','Ferramentas','Ajustável para filtros de diversos diâmetros.',39.90,20,16,5],
+  ['BMB-GRX','Bomba de graxa manual 400 g','Ferramentas','Aplicação precisa de graxa em pontos de lubrificação.',59.90,32,10,3],
+  ['MOR-5','Morsa de bancada nº 5','Ferramentas','Ferro fundido com base giratória e mordentes temperados.',219.90,140,4,2],
+  ['SCN-OBD2','Scanner automotivo OBD2 Bluetooth','Diagnóstico','Leitura e limpeza de códigos de falha, compatível com a maioria dos veículos.',179.90,95,12,4],
+  ['MLT-AUT','Multímetro automotivo digital','Diagnóstico','Medição de tensão, corrente, resistência e RPM.',129.90,70,0,3],
+  ['TST-BAT','Testador digital de bateria 12V','Diagnóstico','Mostra tensão, saúde da bateria e teste do sistema de carga.',199.90,120,6,2],
+  ['OL-5W30-4L','Óleo sintético 5W30 - 4 litros','Lubrificantes','Óleo 100% sintético para motores flex e gasolina.',219.90,150,20,6],
+  ['ADT-RAD1','Aditivo para radiador concentrado 1 litro','Lubrificantes','Protege contra corrosão e superaquecimento.',29.90,15,40,12],
+  ['FLD-DOT4','Fluido de freio DOT 4 - 500 ml','Lubrificantes','Alto ponto de ebulição para sistemas de freio com ABS.',32.90,18,25,8],
+  ['BAT-60AH','Bateria automotiva 60Ah','Elétrica','Bateria selada livre de manutenção, 18 meses de garantia.',489.00,360,4,3],
+  ['CAR-BAT','Carregador inteligente de bateria 12V 10A','Elétrica','Carga automática com proteção contra sobrecarga e inversão de polaridade.',239.90,150,7,3],
+  ['CAB-CHP','Cabos auxiliares de bateria 500A','Elétrica','Garras reforçadas e cabo flexível de 3 metros.',119.90,65,9,3],
+  ['CMP-50L','Compressor de ar 50 litros 2 HP','Compressores','Reservatório de 50 L, ideal para pistola pneumática e calibragem.',1299.00,920,3,1],
+  ['CAL-DIG','Calibrador digital de pneus com mangueira','Pneus e Rodas','Display digital, escala em PSI e BAR, com bico de encaixe rápido.',119.90,65,14,4],
+  ['CHV-RODA','Chave de roda em cruz 17/19/21/22 mm','Pneus e Rodas','Aço forjado com acabamento cromado e boa alavanca.',69.90,38,15,5],
+  ['PAS-FRE','Jogo de pastilhas de freio dianteiras','Freios','Pastilhas cerâmicas para linha popular, baixa poeira.',129.90,80,10,4],
+  ['DSC-FRE','Disco de freio ventilado dianteiro (par)','Freios','Ferro fundido balanceado, ótima dissipação de calor.',389.90,250,6,2],
+  ['FLT-OL','Filtro de óleo linha popular','Filtros','Alta capacidade de retenção de impurezas.',34.90,18,30,10],
+  ['FLT-AR','Filtro de ar do motor','Filtros','Papel pregueado de alta eficiência de filtragem.',54.90,30,18,6],
+  ['FLT-CMB','Filtro de combustível','Filtros','Protege os bicos injetores contra impurezas.',49.90,26,12,5],
+  ['LMP-LED','Kit lâmpadas LED H7 (par)','Iluminação','6000K, alto brilho e baixo consumo, instalação plug and play.',149.90,85,10,4],
+  ['LNT-TRB','Lanterna LED recarregável de trabalho','Iluminação','Base magnética e gancho, ideal para inspeção sob o capô.',89.90,48,13,4],
+  ['DES-5L','Desengraxante concentrado 5 litros','Limpeza','Remove óleo e graxa de peças, pisos e bancadas.',74.90,42,11,4],
+  ['EPI-LUV','Luva de proteção para mecânico','Segurança','Nitrílica com ótima sensibilidade e resistência a óleo.',24.90,12,35,10],
+  ['EPI-OCU','Óculos de proteção incolor','Segurança','Lente antirrisco e antiembaçante, proteção lateral.',18.90,8,28,10]
+].map(([sku, nome, categoria, descricao, preco, custo, quantidade, estoque_minimo]) =>
+  ({ sku, nome, categoria, descricao, preco, custo, quantidade, estoque_minimo }));
+
+/* ============================================================
+   SQL DE INSTALAÇÃO (rodar uma vez no SQL Editor do Supabase)
+   ============================================================ */
+const SETUP_SQL = `-- TABELAS
+create table if not exists produtos (
+  id uuid primary key default gen_random_uuid(),
+  sku text unique,
+  nome text not null,
+  categoria text default 'Geral',
+  descricao text,
+  preco numeric(10,2) not null default 0,
+  custo numeric(10,2) default 0,
+  quantidade integer not null default 0 check (quantidade >= 0),
+  estoque_minimo integer not null default 5,
+  imagem_url text,
+  ativo boolean not null default true,
+  criado_em timestamptz default now()
+);
+
+create table if not exists movimentacoes (
+  id uuid primary key default gen_random_uuid(),
+  produto_id uuid references produtos(id) on delete cascade,
+  tipo text not null check (tipo in ('entrada','saida','ajuste','venda')),
+  quantidade integer not null,
+  motivo text,
+  criado_em timestamptz default now()
+);
+
+create table if not exists pedidos (
+  id uuid primary key default gen_random_uuid(),
+  numero serial,
+  cliente_nome text not null,
+  cliente_telefone text not null,
+  observacao text,
+  itens jsonb not null,
+  total numeric(10,2) not null,
+  status text not null default 'novo' check (status in ('novo','confirmado','entregue','cancelado')),
+  criado_em timestamptz default now()
+);
+
+-- SEGURANÇA (RLS): público só lê produtos ativos; admin logado faz tudo
+alter table produtos enable row level security;
+alter table movimentacoes enable row level security;
+alter table pedidos enable row level security;
+
+drop policy if exists "publico le produtos ativos" on produtos;
+create policy "publico le produtos ativos" on produtos for select using (ativo = true);
+drop policy if exists "admin produtos" on produtos;
+create policy "admin produtos" on produtos for all to authenticated using (true) with check (true);
+drop policy if exists "admin movimentacoes" on movimentacoes;
+create policy "admin movimentacoes" on movimentacoes for all to authenticated using (true) with check (true);
+drop policy if exists "admin pedidos" on pedidos;
+create policy "admin pedidos" on pedidos for all to authenticated using (true) with check (true);
+
+-- FUNÇÃO: cliente cria pedido (valida estoque e baixa automaticamente)
+create or replace function criar_pedido(p_nome text, p_tel text, p_obs text, p_itens jsonb)
+returns integer language plpgsql security definer set search_path = public as $$
+declare item jsonb; prod produtos%rowtype; v_total numeric := 0;
+        v_itens jsonb := '[]'::jsonb; qtd int; num int;
+begin
+  if p_nome is null or length(trim(p_nome)) < 2 then raise exception 'Informe seu nome'; end if;
+  if p_tel is null or length(trim(p_tel)) < 8 then raise exception 'Informe um telefone válido'; end if;
+  if jsonb_array_length(p_itens) = 0 then raise exception 'Carrinho vazio'; end if;
+  for item in select * from jsonb_array_elements(p_itens) loop
+    qtd := (item->>'qtd')::int;
+    if qtd <= 0 then raise exception 'Quantidade inválida'; end if;
+    select * into prod from produtos where id = (item->>'id')::uuid and ativo for update;
+    if not found then raise exception 'Produto indisponível'; end if;
+    if prod.quantidade < qtd then raise exception 'Estoque insuficiente para %', prod.nome; end if;
+    update produtos set quantidade = quantidade - qtd where id = prod.id;
+    insert into movimentacoes(produto_id, tipo, quantidade, motivo)
+      values (prod.id, 'venda', qtd, 'Pedido da loja online');
+    v_total := v_total + prod.preco * qtd;
+    v_itens := v_itens || jsonb_build_object('id', prod.id, 'nome', prod.nome,
+               'sku', prod.sku, 'preco', prod.preco, 'qtd', qtd);
+  end loop;
+  insert into pedidos(cliente_nome, cliente_telefone, observacao, itens, total)
+    values (trim(p_nome), trim(p_tel), p_obs, v_itens, v_total) returning numero into num;
+  return num;
+end $$;
+
+-- FUNÇÃO: admin movimenta estoque (entrada, saída ou ajuste)
+create or replace function movimentar_estoque(p_produto uuid, p_tipo text, p_qtd int, p_motivo text)
+returns void language plpgsql security definer set search_path = public as $$
+declare atual int; novo int;
+begin
+  if auth.uid() is null then raise exception 'Não autorizado'; end if;
+  select quantidade into atual from produtos where id = p_produto for update;
+  if not found then raise exception 'Produto não encontrado'; end if;
+  if p_tipo = 'entrada' then novo := atual + p_qtd;
+  elsif p_tipo = 'saida' then novo := atual - p_qtd;
+  elsif p_tipo = 'ajuste' then novo := p_qtd;
+  else raise exception 'Tipo inválido'; end if;
+  if novo < 0 then raise exception 'O estoque não pode ficar negativo'; end if;
+  update produtos set quantidade = novo where id = p_produto;
+  insert into movimentacoes(produto_id, tipo, quantidade, motivo)
+    values (p_produto, p_tipo, case when p_tipo = 'ajuste' then novo else p_qtd end, p_motivo);
+end $$;
+
+-- FUNÇÃO: admin cancela pedido e devolve itens ao estoque
+create or replace function cancelar_pedido(p_id uuid)
+returns void language plpgsql security definer set search_path = public as $$
+declare ped pedidos%rowtype; item jsonb;
+begin
+  if auth.uid() is null then raise exception 'Não autorizado'; end if;
+  select * into ped from pedidos where id = p_id for update;
+  if not found then raise exception 'Pedido não encontrado'; end if;
+  if ped.status = 'cancelado' then return; end if;
+  for item in select * from jsonb_array_elements(ped.itens) loop
+    update produtos set quantidade = quantidade + (item->>'qtd')::int where id = (item->>'id')::uuid;
+    insert into movimentacoes(produto_id, tipo, quantidade, motivo)
+      values ((item->>'id')::uuid, 'entrada', (item->>'qtd')::int, 'Cancelamento do pedido #' || ped.numero);
+  end loop;
+  update pedidos set status = 'cancelado' where id = p_id;
+end $$;
+
+grant execute on function criar_pedido(text,text,text,jsonb) to anon, authenticated;
+grant execute on function movimentar_estoque(uuid,text,int,text) to authenticated;
+grant execute on function cancelar_pedido(uuid) to authenticated;`;
+
+/* ============================================================
+   UTILITÁRIOS
+   ============================================================ */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl = n => Number(n || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+const fdate = d => new Date(d).toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'});
+const num = v => Number(v || 0);
+const ICON = '<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>';
+
+function toast(msg, type = '') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  $('#toast').appendChild(t);
+  setTimeout(() => t.remove(), 3800);
+}
+async function run(fn) {
+  try { return await fn(); }
+  catch (e) { console.error(e); toast(e.message || 'Ocorreu um erro', 'err'); }
+}
+function openModal(html) {
+  $('#modal-root').innerHTML = `<div class="backdrop"><div class="modal">${html}</div></div>`;
+}
+function closeModal() { $('#modal-root').innerHTML = ''; }
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+let sb = null;
+const state = {
+  produtos: [],
+  cart: JSON.parse(localStorage.getItem('op_cart') || '[]'),
+  q: '', cat: 'Todos',
+  session: null,
+  tab: 'painel',
+  adm: { produtos: [], movs: [], pedidos: [] },
+  pq: '', onlyLow: false
+};
+const saveCart = () => { localStorage.setItem('op_cart', JSON.stringify(state.cart)); $('#cartn').textContent = state.cart.reduce((a, c) => a + c.qtd, 0); };
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+function getCreds() {
+  return {
+    url: CONFIG.SUPABASE_URL || localStorage.getItem('op_url') || '',
+    key: CONFIG.SUPABASE_ANON_KEY || localStorage.getItem('op_key') || ''
+  };
+}
+
+async function init() {
+  document.title = CONFIG.LOJA_NOME + ' | Loja e Controle de Estoque';
+  saveCart();
+  const { url, key } = getCreds();
+  if (!url || !key) return renderSetup();
+  try {
+    sb = supabase.createClient(url, key);
+    const { data } = await sb.auth.getSession();
+    state.session = data.session;
+    sb.auth.onAuthStateChange((_e, s) => { const was = !!state.session; state.session = s; if (was !== !!s) route(); });
+  } catch (e) { toast('Configuração inválida do Supabase', 'err'); return renderSetup(); }
+  window.addEventListener('hashchange', route);
+  route();
+}
+
+function renderSetup() {
+  $('#cartbtn').classList.add('hidden');
+  $('#app').innerHTML = `
+    <div class="panel" style="max-width:820px;margin:auto">
+      <h3>Configurar conexão com o Supabase</h3>
+      <ol class="steps">
+        <li><b>1.</b> Crie um projeto gratuito em <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>.</li>
+        <li><b>2.</b> Abra <b>SQL Editor</b>, cole o script abaixo e clique em <b>Run</b>.</li>
+        <li><b>3.</b> Em <b>Authentication → Users</b>, crie o usuário administrador (e-mail e senha).</li>
+        <li><b>4.</b> Em <b>Project Settings → API</b>, copie a <b>Project URL</b> e a chave <b>anon public</b> e cole aqui.</li>
+        <li><b>5.</b> Depois entre em <b>Estoque → Produtos</b> e clique em <b>Carregar produtos de exemplo</b>.</li>
+      </ol>
+      <div style="margin:16px 0 6px;display:flex;justify-content:space-between;align-items:center">
+        <b>Script SQL</b><button class="btn ghost sm" data-a="copySql">Copiar SQL</button>
+      </div>
+      <pre id="sqlbox">${esc(SETUP_SQL)}</pre>
+      <form data-f="setup" style="margin-top:18px">
+        <div class="field"><label>Project URL</label><input name="url" placeholder="https://xxxxxxxx.supabase.co" required></div>
+        <div class="field"><label>Chave anon public</label><input name="key" placeholder="eyJhbGciOi..." required></div>
+        <button class="btn">Salvar e abrir o site</button>
+      </form>
+    </div>`;
+}
+
+/* ============================================================
+   ROTAS
+   ============================================================ */
+function route() {
+  const admin = location.hash.startsWith('#/admin');
+  $('#nav-loja').classList.toggle('on', !admin);
+  $('#nav-admin').classList.toggle('on', admin);
+  $('#cartbtn').classList.toggle('hidden', admin);
+  $('#foot').innerHTML = `© ${new Date().getFullYear()} ${esc(CONFIG.LOJA_NOME)} · <a href="#" data-a="resetConfig">Reconfigurar Supabase</a>`;
+  closeCart();
+  if (admin) renderAdmin(); else renderStore();
+}
+
+/* ============================================================
+   LOJA
+   ============================================================ */
+async function renderStore() {
+  $('#app').innerHTML = `
+    <section class="hero">
+      <h1>Equipamentos para a sua <span>oficina</span> render mais</h1>
+      <p>Ferramentas, diagnóstico, elevação e lubrificantes com estoque atualizado em tempo real.</p>
+    </section>
+    <div class="tools">
+      <input id="q" placeholder="Buscar por nome ou código..." data-i="q" value="${esc(state.q)}">
+      <div class="chips" id="chips"></div>
+    </div>
+    <div id="grid" class="grid"><div class="empty" style="grid-column:1/-1">Carregando produtos...</div></div>`;
+  await run(loadProdutos);
+  drawChips(); drawGrid();
+}
+
+async function loadProdutos() {
+  const { data, error } = await sb.from('produtos').select('*').eq('ativo', true).order('nome');
+  if (error) throw error;
+  state.produtos = data || [];
+  state.cart = state.cart.filter(c => state.produtos.some(p => p.id === c.id && p.quantidade > 0))
+                         .map(c => ({ id: c.id, qtd: Math.min(c.qtd, state.produtos.find(p => p.id === c.id).quantidade) }));
+  saveCart();
+}
+
+function drawChips() {
+  const el = $('#chips'); if (!el) return;
+  const cats = ['Todos', ...new Set(state.produtos.map(p => p.categoria || 'Geral'))];
+  el.innerHTML = cats.map(c => `<span class="chip ${c === state.cat ? 'on' : ''}" data-a="cat" data-id="${esc(c)}">${esc(c)}</span>`).join('');
+}
+
+function stockBadge(p) {
+  if (p.quantidade <= 0) return '<span class="badge b-out">Esgotado</span>';
+  if (p.quantidade <= p.estoque_minimo) return `<span class="badge b-low">Últimas ${p.quantidade} un.</span>`;
+  return '<span class="badge b-ok">Em estoque</span>';
+}
+
+function drawGrid() {
+  const el = $('#grid'); if (!el) return;
+  const q = state.q.trim().toLowerCase();
+  const list = state.produtos.filter(p =>
+    (state.cat === 'Todos' || (p.categoria || 'Geral') === state.cat) &&
+    (!q || (p.nome + ' ' + (p.sku || '') + ' ' + (p.descricao || '')).toLowerCase().includes(q)));
+  if (!list.length) { el.innerHTML = '<div class="empty" style="grid-column:1/-1">Nenhum produto encontrado.</div>'; return; }
+  el.innerHTML = list.map(p => `
+    <article class="card">
+      <div class="thumb">${p.imagem_url ? `<img src="${esc(p.imagem_url)}" alt="${esc(p.nome)}" loading="lazy" onerror="this.remove()">` : ICON}</div>
+      <div class="body">
+        <span class="cat">${esc(p.categoria || 'Geral')}</span>
+        <h3>${esc(p.nome)}</h3>
+        <span class="sku">Cód. ${esc(p.sku || '—')}</span>
+        <div>${stockBadge(p)}</div>
+        ${p.descricao ? `<p class="muted" style="font-size:13px">${esc(p.descricao)}</p>` : ''}
+        <div class="price">${brl(p.preco)}</div>
+        <button class="btn" data-a="addCart" data-id="${p.id}" ${p.quantidade <= 0 ? 'disabled' : ''}>${p.quantidade <= 0 ? 'Indisponível' : 'Adicionar ao carrinho'}</button>
+      </div>
+    </article>`).join('');
+}
+
+/* ---- carrinho ---- */
+function cartItems() {
+  return state.cart.map(c => {
+    const p = state.produtos.find(x => x.id === c.id);
+    return p ? { ...p, qtd: c.qtd } : null;
+  }).filter(Boolean);
+}
+function addCart(id) {
+  const p = state.produtos.find(x => x.id === id); if (!p) return;
+  const c = state.cart.find(x => x.id === id);
+  if (c) {
+    if (c.qtd >= p.quantidade) return toast('Quantidade máxima em estoque atingida', 'err');
+    c.qtd++;
+  } else state.cart.push({ id, qtd: 1 });
+  saveCart(); toast('Adicionado ao carrinho', 'ok');
+}
+function changeQty(id, d) {
+  const c = state.cart.find(x => x.id === id); const p = state.produtos.find(x => x.id === id);
+  if (!c || !p) return;
+  c.qtd += d;
+  if (c.qtd > p.quantidade) { c.qtd = p.quantidade; toast('Limite de estoque', 'err'); }
+  if (c.qtd <= 0) state.cart = state.cart.filter(x => x.id !== id);
+  saveCart(); drawCart();
+}
+function drawCart() {
+  const items = cartItems();
+  const total = items.reduce((a, i) => a + i.preco * i.qtd, 0);
+  $('#drawer').innerHTML = `
+    <div class="head"><h2>Seu carrinho</h2><button class="btn ghost sm" data-a="closeCart">Fechar</button></div>
+    <div class="items">${items.length ? items.map(i => `
+      <div class="citem">
+        <div class="mini">${i.imagem_url ? `<img src="${esc(i.imagem_url)}" alt="" onerror="this.remove()">` : '⚙'}</div>
+        <div class="info"><b>${esc(i.nome)}</b><span class="muted" style="font-size:13px">${brl(i.preco)}</span></div>
+        <div class="qty"><button data-a="dec" data-id="${i.id}">−</button><span>${i.qtd}</span><button data-a="inc" data-id="${i.id}">+</button></div>
+      </div>`).join('') : '<div class="empty" style="margin-top:30px">Seu carrinho está vazio.</div>'}</div>
+    <div class="foot">
+      <div class="total"><span>Total</span><b>${brl(total)}</b></div>
+      <button class="btn wpp" style="width:100%" data-a="checkout" ${items.length ? '' : 'disabled'}>Finalizar pelo WhatsApp</button>
+    </div>`;
+}
+function openCart() { drawCart(); $('#drawer').classList.add('open'); $('#overlay').classList.add('open'); }
+function closeCart() { $('#drawer').classList.remove('open'); $('#overlay').classList.remove('open'); }
+
+function checkout() {
+  closeCart();
+  const total = cartItems().reduce((a, i) => a + i.preco * i.qtd, 0);
+  openModal(`
+    <h2>Finalizar pedido</h2>
+    <form data-f="order">
+      <div class="field"><label>Nome completo</label><input name="nome" required minlength="5" autocomplete="name" placeholder="Digite seu nome completo"></div>
+      <p class="muted" style="font-size:14px">Total: <b style="color:var(--text)">${brl(total)}</b><br>Ao confirmar, seu pedido é enviado direto para o WhatsApp da loja.</p>
+      <div class="actions"><button type="button" class="btn ghost" data-a="close">Cancelar</button><button class="btn wpp">Enviar pelo WhatsApp</button></div>
+    </form>`);
+}
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+async function renderAdmin() {
+  if (!state.session) {
+    $('#app').innerHTML = `
+      <div class="panel login">
+        <h3>Acesso ao estoque</h3>
+        <form data-f="login">
+          <div class="field"><label>E-mail</label><input type="email" name="email" required autocomplete="username"></div>
+          <div class="field"><label>Senha</label><input type="password" name="senha" required autocomplete="current-password"></div>
+          <button class="btn" style="width:100%">Entrar</button>
+        </form>
+        <p class="muted" style="font-size:13px;margin-top:12px">O usuário administrador é criado no painel do Supabase em Authentication → Users.</p>
+      </div>`;
+    return;
+  }
+  $('#app').innerHTML = '<div class="empty">Carregando dados...</div>';
+  await run(loadAdmin);
+  drawAdmin();
+}
+
+async function loadAdmin() {
+  const [p, m, o] = await Promise.all([
+    sb.from('produtos').select('*').order('nome'),
+    sb.from('movimentacoes').select('*, produtos(nome, sku)').order('criado_em', { ascending: false }).limit(300),
+    sb.from('pedidos').select('*').order('criado_em', { ascending: false }).limit(200)
+  ]);
+  if (p.error) throw p.error; if (m.error) throw m.error; if (o.error) throw o.error;
+  state.adm = { produtos: p.data, movs: m.data, pedidos: o.data };
+}
+
+function drawAdmin() {
+  const tabs = [['painel','Painel'],['produtos','Produtos'],['movs','Movimentações'],['pedidos','Pedidos']];
+  const novos = state.adm.pedidos.filter(p => p.status === 'novo').length;
+  $('#app').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <h2 style="font-size:34px;text-transform:uppercase">Controle de estoque</h2>
+      <div><span class="muted" style="font-size:13px;margin-right:10px">${esc(state.session.user.email)}</span><button class="btn ghost sm" data-a="logout">Sair</button></div>
+    </div>
+    <div class="tabs">${tabs.map(([k, l]) => `<button class="${state.tab === k ? 'on' : ''}" data-a="tab" data-id="${k}">${l}${k === 'pedidos' && novos ? ` <span class="badge b-info">${novos}</span>` : ''}</button>`).join('')}</div>
+    <div id="tabbody"></div>`;
+  drawTab();
+}
+
+function drawTab() {
+  const el = $('#tabbody'); if (!el) return;
+  ({ painel: tabPainel, produtos: tabProdutos, movs: tabMovs, pedidos: tabPedidos })[state.tab](el);
+}
+
+function tabPainel(el) {
+  const ps = state.adm.produtos;
+  const ativos = ps.filter(p => p.ativo);
+  const unidades = ativos.reduce((a, p) => a + p.quantidade, 0);
+  const valor = ativos.reduce((a, p) => a + p.quantidade * num(p.custo || p.preco), 0);
+  const venda = ativos.reduce((a, p) => a + p.quantidade * num(p.preco), 0);
+  const low = ativos.filter(p => p.quantidade <= p.estoque_minimo).sort((a, b) => a.quantidade - b.quantidade);
+  el.innerHTML = `
+    <div class="stats">
+      <div class="stat"><small>Produtos ativos</small><div>${ativos.length}</div></div>
+      <div class="stat"><small>Unidades em estoque</small><div>${unidades}</div></div>
+      <div class="stat"><small>Valor em estoque (custo)</small><div>${brl(valor)}</div></div>
+      <div class="stat"><small>Valor potencial de venda</small><div>${brl(venda)}</div></div>
+      <div class="stat ${low.length ? 'warn' : ''}"><small>Estoque baixo / zerado</small><div>${low.length}</div></div>
+    </div>
+    <div class="two">
+      <div class="panel"><h3>Precisam de reposição</h3>
+        ${low.length ? `<div class="tw"><table><tr><th>Produto</th><th class="r">Atual</th><th class="r">Mínimo</th><th></th></tr>
+        ${low.map(p => `<tr><td>${esc(p.nome)}</td><td class="r">${p.quantidade <= 0 ? '<span class="badge b-out">0</span>' : `<span class="badge b-low">${p.quantidade}</span>`}</td><td class="r">${p.estoque_minimo}</td><td class="r"><button class="btn sm" data-a="mov" data-id="${p.id}">Repor</button></td></tr>`).join('')}</table></div>` : '<p class="muted">Tudo certo, nenhum item abaixo do mínimo. 👌</p>'}
+      </div>
+      <div class="panel"><h3>Últimas movimentações</h3>
+        ${state.adm.movs.length ? `<div class="tw"><table>${state.adm.movs.slice(0, 8).map(m => `<tr><td>${esc(m.produtos?.nome || '—')}</td><td>${movBadge(m)}</td><td class="muted">${fdate(m.criado_em)}</td></tr>`).join('')}</table></div>` : '<p class="muted">Sem movimentações ainda.</p>'}
+      </div>
+    </div>`;
+}
+
+function movBadge(m) {
+  if (m.tipo === 'entrada') return `<span class="badge b-ok">+${m.quantidade} entrada</span>`;
+  if (m.tipo === 'saida') return `<span class="badge b-out">−${m.quantidade} saída</span>`;
+  if (m.tipo === 'venda') return `<span class="badge b-info">−${m.quantidade} venda</span>`;
+  return `<span class="badge b-mute">→ ${m.quantidade} ajuste</span>`;
+}
+
+function tabProdutos(el) {
+  el.innerHTML = `
+    <div class="tools">
+      <input placeholder="Buscar produto ou código..." data-i="pq" value="${esc(state.pq)}">
+      <label style="display:flex;gap:6px;align-items:center;margin:0;cursor:pointer"><input type="checkbox" style="width:auto" data-i="low" ${state.onlyLow ? 'checked' : ''}> Só estoque baixo</label>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn ghost" data-a="sample">Carregar produtos de exemplo</button>
+        <button class="btn ghost" data-a="csv">Exportar CSV</button>
+        <button class="btn" data-a="newProd">+ Novo produto</button>
+      </div>
+    </div>
+    <div class="panel"><div class="tw" id="ptable"></div></div>`;
+  drawProdTable();
+}
+
+function drawProdTable() {
+  const el = $('#ptable'); if (!el) return;
+  const q = state.pq.trim().toLowerCase();
+  const list = state.adm.produtos.filter(p =>
+    (!q || (p.nome + ' ' + (p.sku || '') + ' ' + (p.categoria || '')).toLowerCase().includes(q)) &&
+    (!state.onlyLow || p.quantidade <= p.estoque_minimo));
+  if (!list.length) { el.innerHTML = '<p class="muted">Nenhum produto encontrado.</p>'; return; }
+  el.innerHTML = `<table>
+    <tr><th>Produto</th><th>Categoria</th><th class="r">Custo</th><th class="r">Preço</th><th class="r">Estoque</th><th>Status</th><th></th></tr>
+    ${list.map(p => `<tr>
+      <td><div class="tcell"><div class="mini">${p.imagem_url ? `<img src="${esc(p.imagem_url)}" alt="" onerror="this.remove()">` : '⚙'}</div><div><b style="font-weight:500">${esc(p.nome)}</b><br><span class="muted" style="font-size:12px">${esc(p.sku || '—')}</span></div></div></td>
+      <td>${esc(p.categoria || '')}</td>
+      <td class="r">${brl(p.custo)}</td>
+      <td class="r">${brl(p.preco)}</td>
+      <td class="r"><b>${p.quantidade}</b> <span class="muted" style="font-size:12px">/ mín ${p.estoque_minimo}</span></td>
+      <td>${!p.ativo ? '<span class="badge b-mute">Oculto na loja</span>' : p.quantidade <= 0 ? '<span class="badge b-out">Esgotado</span>' : p.quantidade <= p.estoque_minimo ? '<span class="badge b-low">Baixo</span>' : '<span class="badge b-ok">OK</span>'}</td>
+      <td><div class="btns"><button class="btn sm" data-a="mov" data-id="${p.id}">Movimentar</button><button class="btn ghost sm" data-a="editProd" data-id="${p.id}">Editar</button><button class="btn danger sm" data-a="delProd" data-id="${p.id}">Excluir</button></div></td>
+    </tr>`).join('')}</table>`;
+}
+
+function tabMovs(el) {
+  const ms = state.adm.movs;
+  el.innerHTML = `<div class="panel"><div class="tw">${ms.length ? `<table>
+    <tr><th>Data</th><th>Produto</th><th>Movimento</th><th>Motivo</th></tr>
+    ${ms.map(m => `<tr><td class="muted">${fdate(m.criado_em)}</td><td>${esc(m.produtos?.nome || 'Produto removido')}<br><span class="muted" style="font-size:12px">${esc(m.produtos?.sku || '')}</span></td><td>${movBadge(m)}</td><td>${esc(m.motivo || '')}</td></tr>`).join('')}</table>` : '<p class="muted">Nenhuma movimentação registrada.</p>'}</div></div>`;
+}
+
+const STATUS = { novo: 'b-info', confirmado: 'b-low', entregue: 'b-ok', cancelado: 'b-out' };
+function tabPedidos(el) {
+  const os = state.adm.pedidos;
+  el.innerHTML = os.length ? os.map(o => `
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+        <div><h3 style="margin:0">Pedido #${o.numero}</h3><span class="muted" style="font-size:13px">${fdate(o.criado_em)}</span></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge ${STATUS[o.status]}">${o.status}</span>
+          ${o.status !== 'cancelado' ? `<select style="width:auto;padding:6px 10px" data-i="status" data-id="${o.id}">
+            ${['novo','confirmado','entregue'].map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}</select>
+          <button class="btn danger sm" data-a="cancelOrder" data-id="${o.id}">Cancelar pedido</button>` : ''}
+        </div>
+      </div>
+      <p style="margin:10px 0 6px"><b>${esc(o.cliente_nome)}</b>${o.cliente_telefone && o.cliente_telefone !== 'WhatsApp' ? ' · ' + esc(o.cliente_telefone) : ' · via WhatsApp'}</p>
+      ${o.observacao ? `<p class="muted" style="font-size:14px">Obs: ${esc(o.observacao)}</p>` : ''}
+      <div class="tw"><table>${o.itens.map(i => `<tr><td>${esc(i.nome)}</td><td class="r">${i.qtd} × ${brl(i.preco)}</td><td class="r">${brl(i.qtd * i.preco)}</td></tr>`).join('')}
+      <tr><td colspan="2" class="r"><b>Total</b></td><td class="r"><b>${brl(o.total)}</b></td></tr></table></div>
+    </div>`).join('') : '<div class="empty">Nenhum pedido recebido ainda.</div>';
+}
+
+/* ---- modais admin ---- */
+function prodForm(p = null) {
+  const cats = [...new Set(state.adm.produtos.map(x => x.categoria).filter(Boolean))];
+  openModal(`
+    <h2>${p ? 'Editar produto' : 'Novo produto'}</h2>
+    <form data-f="prod" data-id="${p ? p.id : ''}">
+      <div class="field"><label>Nome *</label><input name="nome" required value="${esc(p?.nome)}"></div>
+      <div class="row">
+        <div class="field"><label>Código / SKU</label><input name="sku" value="${esc(p?.sku)}"></div>
+        <div class="field"><label>Categoria</label><input name="categoria" list="cats" value="${esc(p?.categoria || '')}"><datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist></div>
+      </div>
+      <div class="field"><label>Descrição</label><textarea name="descricao" rows="2">${esc(p?.descricao)}</textarea></div>
+      <div class="row3">
+        <div class="field"><label>Custo (R$)</label><input type="number" step="0.01" min="0" name="custo" value="${p ? p.custo : 0}"></div>
+        <div class="field"><label>Preço de venda (R$) *</label><input type="number" step="0.01" min="0" name="preco" required value="${p ? p.preco : ''}"></div>
+        <div class="field"><label>Estoque mínimo</label><input type="number" min="0" name="estoque_minimo" value="${p ? p.estoque_minimo : 5}"></div>
+      </div>
+      ${p ? '' : '<div class="field"><label>Quantidade inicial em estoque</label><input type="number" min="0" name="quantidade" value="0"></div>'}
+      <div class="field"><label>URL da imagem (opcional)</label><input type="url" name="imagem_url" placeholder="https://..." value="${esc(p?.imagem_url)}"></div>
+      <label style="display:flex;gap:8px;align-items:center;cursor:pointer;color:var(--text)"><input type="checkbox" name="ativo" style="width:auto" ${!p || p.ativo ? 'checked' : ''}> Exibir na loja</label>
+      ${p ? '<p class="muted" style="font-size:13px;margin-top:10px">Para alterar a quantidade, use o botão Movimentar (assim fica registrado no histórico).</p>' : ''}
+      <div class="actions"><button type="button" class="btn ghost" data-a="close">Cancelar</button><button class="btn">Salvar</button></div>
+    </form>`);
+}
+
+function movForm(id) {
+  const p = state.adm.produtos.find(x => x.id === id); if (!p) return;
+  openModal(`
+    <h2>Movimentar estoque</h2>
+    <p style="margin-bottom:14px"><b>${esc(p.nome)}</b><br><span class="muted">Estoque atual: ${p.quantidade} un.</span></p>
+    <form data-f="mov" data-id="${p.id}">
+      <div class="row">
+        <div class="field"><label>Tipo</label><select name="tipo"><option value="entrada">Entrada (+)</option><option value="saida">Saída (−)</option><option value="ajuste">Ajuste (definir total)</option></select></div>
+        <div class="field"><label>Quantidade</label><input type="number" name="qtd" min="0" required value="1"></div>
+      </div>
+      <div class="field"><label>Motivo</label><input name="motivo" placeholder="Ex: compra de fornecedor, uso na oficina, inventário"></div>
+      <div class="actions"><button type="button" class="btn ghost" data-a="close">Cancelar</button><button class="btn">Registrar</button></div>
+    </form>`);
+}
+
+/* ============================================================
+   AÇÕES (cliques)
+   ============================================================ */
+const actions = {
+  close: closeModal,
+  openCart, closeCart,
+  cat: id => { state.cat = id; drawChips(); drawGrid(); },
+  addCart: id => { addCart(id); },
+  inc: id => changeQty(id, 1),
+  dec: id => changeQty(id, -1),
+  checkout,
+  copySql: () => navigator.clipboard.writeText(SETUP_SQL).then(() => toast('SQL copiado!', 'ok')).catch(() => toast('Selecione o texto e copie manualmente', 'err')),
+  resetConfig: (_i, _el, e) => { e.preventDefault(); if (confirm('Remover a configuração salva do Supabase neste navegador?')) { localStorage.removeItem('op_url'); localStorage.removeItem('op_key'); location.reload(); } },
+  logout: () => run(async () => { await sb.auth.signOut(); toast('Você saiu', 'ok'); }),
+  tab: id => { state.tab = id; drawAdmin(); },
+  newProd: () => prodForm(),
+  editProd: id => prodForm(state.adm.produtos.find(p => p.id === id)),
+  mov: id => movForm(id),
+  sample: () => run(async () => {
+    if (!confirm('Adicionar os produtos de exemplo? Os que já existem (mesmo código) não serão alterados.')) return;
+    const { data, error } = await sb.from('produtos').upsert(SAMPLE_PRODUCTS, { onConflict: 'sku', ignoreDuplicates: true }).select();
+    if (error) throw error;
+    const novos = data || [];
+    const movs = novos.filter(p => p.quantidade > 0).map(p => ({ produto_id: p.id, tipo: 'entrada', quantidade: p.quantidade, motivo: 'Estoque inicial' }));
+    if (movs.length) await sb.from('movimentacoes').insert(movs);
+    toast(novos.length ? novos.length + ' produtos adicionados' : 'Todos os produtos de exemplo já estavam cadastrados', 'ok');
+    await loadAdmin(); drawAdmin();
+  }),
+  delProd: id => run(async () => {
+    const p = state.adm.produtos.find(x => x.id === id);
+    if (!confirm(`Excluir "${p.nome}"? O histórico de movimentações dele também será apagado.\n(Dica: desmarque "Exibir na loja" para apenas ocultar.)`)) return;
+    const { error } = await sb.from('produtos').delete().eq('id', id); if (error) throw error;
+    toast('Produto excluído', 'ok'); await loadAdmin(); drawAdmin();
+  }),
+  cancelOrder: id => run(async () => {
+    if (!confirm('Cancelar este pedido e devolver os itens ao estoque?')) return;
+    const { error } = await sb.rpc('cancelar_pedido', { p_id: id }); if (error) throw error;
+    toast('Pedido cancelado e estoque restaurado', 'ok'); await loadAdmin(); drawAdmin();
+  }),
+  csv: () => {
+    const head = ['SKU','Nome','Categoria','Custo','Preco','Quantidade','Estoque minimo','Ativo'];
+    const rows = state.adm.produtos.map(p => [p.sku, p.nome, p.categoria, p.custo, p.preco, p.quantidade, p.estoque_minimo, p.ativo ? 'sim' : 'nao']);
+    const csv = [head, ...rows].map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'estoque-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+  }
+};
+
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('backdrop')) return closeModal();
+  const el = e.target.closest('[data-a]'); if (!el) return;
+  const fn = actions[el.dataset.a]; if (fn) fn(el.dataset.id, el, e);
+});
+
+/* ============================================================
+   FORMULÁRIOS
+   ============================================================ */
+const forms = {
+  setup: f => {
+    const url = f.url.value.trim().replace(/\/$/, ''), key = f.key.value.trim();
+    if (!url.startsWith('http')) return toast('URL inválida', 'err');
+    localStorage.setItem('op_url', url); localStorage.setItem('op_key', key);
+    location.reload();
+  },
+  login: f => run(async () => {
+    const { error } = await sb.auth.signInWithPassword({ email: f.email.value.trim(), password: f.senha.value });
+    if (error) throw new Error('E-mail ou senha incorretos');
+    toast('Bem-vindo!', 'ok');
+  }),
+  order: f => run(async () => {
+    const nome = f.nome.value.trim().replace(/\s+/g, ' ');
+    if (nome.split(' ').length < 2) throw new Error('Digite seu nome completo (nome e sobrenome)');
+    const itens = state.cart.map(c => ({ id: c.id, qtd: c.qtd }));
+    const resumo = cartItems();
+    const total = resumo.reduce((a, i) => a + i.preco * i.qtd, 0);
+    // reserva o estoque e registra o pedido no sistema
+    const { data, error } = await sb.rpc('criar_pedido', { p_nome: nome, p_tel: 'WhatsApp', p_obs: null, p_itens: itens });
+    if (error) { await loadProdutos().catch(() => {}); drawGrid(); throw error; }
+    state.cart = []; saveCart();
+    await loadProdutos().catch(() => {}); drawChips(); drawGrid();
+
+    const msg = `Olá! Quero fazer o pedido #${data}:\n\n` +
+      resumo.map(i => `• ${i.qtd}x ${i.nome} - ${brl(i.preco * i.qtd)}`).join('\n') +
+      `\n\n*Total: ${brl(total)}*\nNome: ${nome}`;
+    const link = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(msg)}`;
+    openModal(`<h2>Pedido #${data} registrado!</h2>
+      <p class="muted">Abrindo o WhatsApp para enviar seu pedido à loja. Se não abrir sozinho, toque no botão abaixo.</p>
+      <div class="actions"><button class="btn ghost" data-a="close">Fechar</button><a class="btn wpp" style="text-decoration:none" href="${link}" target="_blank" rel="noopener">Abrir WhatsApp</a></div>`);
+    setTimeout(() => { window.location.href = link; }, 800);
+  }),
+  prod: f => run(async () => {
+    const id = f.dataset.id;
+    const d = {
+      nome: f.nome.value.trim(), sku: f.sku.value.trim() || null, categoria: f.categoria.value.trim() || 'Geral',
+      descricao: f.descricao.value.trim() || null, custo: num(f.custo.value), preco: num(f.preco.value),
+      estoque_minimo: parseInt(f.estoque_minimo.value) || 0, imagem_url: f.imagem_url.value.trim() || null, ativo: f.ativo.checked
+    };
+    if (id) {
+      const { error } = await sb.from('produtos').update(d).eq('id', id); if (error) throw error;
+    } else {
+      d.quantidade = Math.max(0, parseInt(f.quantidade.value) || 0);
+      const { data, error } = await sb.from('produtos').insert(d).select().single(); if (error) throw error;
+      if (d.quantidade > 0) await sb.from('movimentacoes').insert({ produto_id: data.id, tipo: 'entrada', quantidade: d.quantidade, motivo: 'Estoque inicial' });
+    }
+    closeModal(); toast('Produto salvo', 'ok'); await loadAdmin(); drawAdmin();
+  }),
+  mov: f => run(async () => {
+    const { error } = await sb.rpc('movimentar_estoque', { p_produto: f.dataset.id, p_tipo: f.tipo.value, p_qtd: parseInt(f.qtd.value) || 0, p_motivo: f.motivo.value.trim() || null });
+    if (error) throw error;
+    closeModal(); toast('Movimentação registrada', 'ok'); await loadAdmin(); drawAdmin();
+  })
+};
+document.addEventListener('submit', e => {
+  const f = e.target.closest('form[data-f]'); if (!f) return;
+  e.preventDefault(); forms[f.dataset.f](f);
+});
+
+const inputs = {
+  q: v => { state.q = v; drawGrid(); },
+  pq: v => { state.pq = v; drawProdTable(); },
+  low: (_v, el) => { state.onlyLow = el.checked; drawProdTable(); },
+  status: (v, el) => run(async () => {
+    const { error } = await sb.from('pedidos').update({ status: v }).eq('id', el.dataset.id); if (error) throw error;
+    toast('Status atualizado', 'ok'); await loadAdmin(); drawAdmin();
+  })
+};
+document.addEventListener('input', e => {
+  const k = e.target.dataset.i; if (k && ['q','pq'].includes(k)) inputs[k](e.target.value);
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset.i; if (k && ['low','status'].includes(k)) inputs[k](e.target.value, e.target);
+});
+
+init();
+</script>
+</body>
+</html>
